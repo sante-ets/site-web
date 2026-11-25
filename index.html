@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Santé ÉTS site démo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE  club étudiant sérieux mais vivant : health-tech, beaucoup d'air
+   IDEA   le moniteur de signes vitaux : un tracé ECG traverse le site, sur un fond de dégradé granuleux
+   PICTURE hero plein écran en WebGL (dégradé nuit, bleu, ciel, rouge vital) + tracé ECG animé
+   COLOUR charte Santé ÉTS : Nuit #0D1A35, Navy, Bleu ÉTS, Ciel, Rouge Vital ; sections claires Blanc Froid
+   TYPE   DM Serif Display (titres) + DM Sans (texte) + Space Mono (dates seulement)
+   LAYOUT titre en bas à gauche du hero, bandes alternées sombre / clair, tout empilé sous 600px */
+:root{color-scheme:dark;--nuit:#0D1A35;--navy:#1A2C5B;--bleu:#1E4FA3;--ciel:#5B9FE8;--rouge:#C8302A;--corail:#E85B5B;--froid:#F5F7FC;--pale:#EDF2FF;--gris:#8A9AB8;--ink:#0D1A35;--muted:#44506B;--serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--mono:'Space Mono',ui-monospace,monospace}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--nuit);color:#fff;font:16px/1.6 var(--sans);overflow-x:clip}
+img,svg{max-width:100%}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(56px,8vw,112px) max(5vw,16px)}
+.light{background:var(--froid);color:var(--ink)}
+.pale{background:var(--pale);color:var(--ink)}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h2{font-size:clamp(34px,4.6vw,52px)}
+h3{font-size:24px;line-height:1.15}
+p{margin:0}
+.lead{font-size:17px;max-width:62ch}
+.light .lead,.pale .lead{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 26px;border-radius:999px;font:600 15px var(--sans);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:background .2s,transform .2s,box-shadow .2s}
+.btn.red{background:var(--rouge);color:#fff}
+.btn.red:hover{background:var(--corail);transform:translateY(-1px);box-shadow:0 10px 28px rgba(200,48,42,.4)}
+.btn.ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:#fff}
+.btn.ghost:hover{background:rgba(255,255,255,.16)}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ciel);outline-offset:3px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(13,26,53,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+nav .wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:12px max(5vw,16px)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo b{display:block;font:400 22px/1 var(--serif)}
+.logo small{display:block;font:700 10px/1 var(--mono);letter-spacing:.24em;color:var(--ciel);margin-top:3px}
+.links{display:flex;gap:22px;margin-left:auto;font-size:14px;font-weight:500}
+.links a{text-decoration:none;color:rgba(255,255,255,.72);padding:8px 0}
+.links a:hover{color:#fff}
+nav .btn{min-height:42px;padding:0 20px;font-size:14px}
+@media(max-width:860px){.links{order:3;width:100%;margin:0;overflow-x:auto;gap:18px;padding-bottom:2px}.links a{flex:none}nav .btn{margin-left:auto}}
+
+/* hero */
+.hero{position:relative;min-height:clamp(600px,92svh,880px);display:grid;align-content:end;overflow:hidden;background:radial-gradient(80% 70% at 85% 30%,rgba(30,79,163,.75),transparent 65%),radial-gradient(60% 60% at 95% 85%,rgba(200,48,42,.55),transparent 60%),var(--nuit)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero .wrap{position:relative;width:100%;padding:0 max(5vw,16px) clamp(32px,5vw,56px)}
+.hero h1{font-size:clamp(46px,8.4vw,112px);max-width:11ch}
+.hero h1 .l{display:block}
+.hero h1 em{color:var(--ciel)}
+.hero .lead{margin-top:22px;color:rgba(255,255,255,.78);max-width:46ch;font-size:clamp(16px,1.6vw,19px)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.ecg{position:relative;display:block;width:100%;height:110px;margin:clamp(24px,4vw,44px) 0 0}
+.ecg path{fill:none;stroke:#fff;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(91,159,232,.9))}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border-top:1px solid rgba(255,255,255,.16);padding-top:20px}
+.facts div{font-size:14px;color:rgba(255,255,255,.7)}
+.facts strong{display:block;font:400 34px/1 var(--serif);color:#fff;margin-bottom:6px}
+
+/* mission */
+.mission{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(32px,6vw,96px);align-items:start}
+.pillars{display:grid;gap:22px;margin-top:28px}
+.pillar{display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:start}
+.ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--pale);color:var(--bleu)}
+.ico svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.pillar:hover .ico svg,.card:hover .ico svg{transform:scale(1.15) rotate(-6deg)}
+.pillar h3{font-size:21px;margin-bottom:4px}
+.pillar p{color:var(--muted)}
+
+/* projets */
+.head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:40px}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-rows:auto auto;gap:20px}
+.card{position:relative;overflow:hidden;background:#fff;border:1px solid rgba(26,44,91,.1);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:12px;color:var(--ink)}
+.card p{color:var(--muted)}
+.spot::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(320px circle at var(--x,50%) var(--y,50%),rgba(91,159,232,.18),transparent 60%)}
+.spot:hover::before{opacity:1}
+.card.big{grid-row:span 2;background:var(--navy);color:#fff;border:0}
+.card.big p{color:rgba(255,255,255,.72)}
+.card.big .ico{background:rgba(91,159,232,.16);color:var(--ciel)}
+.lungs{flex:1;min-height:260px;display:grid;place-items:center;margin:4px 0 8px}
+.lungs svg{width:min(100%,340px);height:auto}
+.cap{font-size:13px;color:var(--gris)}
+.tag{align-self:start;font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--pale);color:var(--bleu)}
+.card.big .tag{background:rgba(200,48,42,.2);color:#FFB3AE}
+
+/* défi */
+.defi{background:linear-gradient(120deg,var(--nuit) 0%,var(--navy) 45%,#6B1A1A 100%);position:relative;overflow:hidden}
+.defi .wrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(32px,6vw,80px);align-items:center}
+.defi .lead{color:rgba(255,255,255,.76);margin-top:18px}
+.stat{border-left:1px solid rgba(255,255,255,.2);padding-left:clamp(20px,4vw,48px)}
+.stat .n{font:400 clamp(96px,14vw,168px)/.9 var(--serif);background:linear-gradient(120deg,var(--ciel),#fff 50%,var(--corail));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat p{color:rgba(255,255,255,.75);margin-top:10px;max-width:30ch}
+
+/* événements */
+.events{list-style:none;margin:0;padding:0;border-top:1px solid rgba(26,44,91,.15)}
+.events li{display:grid;grid-template-columns:minmax(150px,max-content) minmax(0,1fr) auto;gap:clamp(16px,4vw,48px);align-items:baseline;padding:24px 0;border-bottom:1px solid rgba(26,44,91,.15)}
+.date{font:700 20px/1.2 var(--mono);color:var(--bleu);white-space:nowrap}
+.date small{display:block;font:400 13px var(--sans);color:var(--muted);margin-top:4px;letter-spacing:0}
+.events h3{font-size:24px}
+.events p{color:var(--muted);margin-top:4px}
+.events .tag{white-space:nowrap}
+.note{font-size:13px;color:var(--muted);margin-top:16px}
+
+/* implication */
+.join{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,6vw,80px)}
+.ways{display:grid;gap:14px;margin-top:28px}
+.way{position:relative;overflow:hidden;padding:22px 24px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.way h3{font-size:22px;margin-bottom:6px}
+.way p{color:rgba(255,255,255,.68)}
+form{display:grid;gap:16px;padding:clamp(24px,3vw,36px);border-radius:24px;background:var(--froid);color:var(--ink);align-self:start}
+label{display:grid;gap:6px;font-size:14px;font-weight:600}
+input,select,textarea{font:16px var(--sans);color:var(--ink);background:#fff;border:1px solid #C5CEE0;border-radius:10px;padding:12px 14px;width:100%}
+textarea{min-height:110px;resize:vertical}
+form .btn{justify-self:start}
+#ok{font-size:14px;color:var(--bleu);min-height:1.4em}
+
+/* footer */
+footer{background:#08101F;padding:56px max(5vw,16px) 40px;color:rgba(255,255,255,.7);font-size:14px}
+footer .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);gap:32px}
+footer h4{margin:0 0 10px;font:600 14px var(--sans);color:#fff}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+footer a{text-decoration:none}
+footer a:hover{color:#fff}
+pre.ascii{grid-column:1/-1;margin:24px 0 0;font:12px/1.25 var(--mono);color:var(--ciel);opacity:.75;overflow-x:auto}
+.credits{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.1);padding-top:20px;font-size:13px;color:rgba(255,255,255,.5)}
+
+@media(max-width:860px){.grid,.mission,.defi .wrap,.join{grid-template-columns:minmax(0,1fr)}.card.big{grid-row:auto}.stat{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.2);padding-top:24px}footer .wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}footer .wrap>div:first-child{grid-column:1/-1}}
+@media(max-width:600px){.facts{grid-template-columns:minmax(0,1fr)}.facts strong{font-size:28px}.events li{grid-template-columns:minmax(0,1fr)}.events li{gap:8px}.ecg{height:80px}footer .wrap{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ico svg{transition:none}}
+</style>
+</head>
+<body>
+
+<nav aria-label="Navigation principale">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Santé ÉTS, accueil">
+      <svg width="34" height="40" viewBox="0 0 52 56" fill="none" aria-hidden="true"><path d="M26 14 L29 10 L32 14 L36 13 L37 17 L41 18 L40 22 L43 25 L40 28 L41 32 L37 33 L36 37 L32 36 L29 40 L26 36 L22 37 L21 33 L17 32 L18 28 L15 25 L18 22 L17 18 L21 17 L22 13 Z" fill="#C8302A" opacity="0.9"/><circle cx="26" cy="25" r="8" fill="#C8302A" opacity="0.9"/><path d="M10,4 Q18,14 10,24 Q2,34 10,44 Q18,54 10,64" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M18,4 Q10,14 18,24 Q26,34 18,44 Q10,54 18,64" stroke="#5B9FE8" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/><line x1="10" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5"/><line x1="10" y1="24" x2="18" y2="24" stroke="white" stroke-width="1.5"/><line x1="10" y1="36" x2="18" y2="36" stroke="white" stroke-width="1.5"/><line x1="10" y1="48" x2="18" y2="48" stroke="white" stroke-width="1.5"/></svg>
+      <span><b>Santé</b><small>ÉTS</small></span>
+    </a>
+    <div class="links">
+      <a href="#mission">Le club</a>
+      <a href="#projets">Projets</a>
+      <a href="#defi">Défi MÉDIQ</a>
+      <a href="#evenements">Événements</a>
+      <a href="#joindre">Nous joindre</a>
+    </div>
+    <a class="btn red" href="#joindre">Devenir membre</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <canvas id="sh" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <h1><span class="l">L'ingénierie</span> <span class="l">au service</span> <span class="l">de <em>la vie</em>.</span></h1>
+    <p class="lead">Santé ÉTS rassemble les étudiant·es de l'ÉTS qui veulent mettre le génie au travail sur de vrais problèmes cliniques, avec des chercheurs, des soignants et des patients.</p>
+    <div class="cta">
+      <a class="btn red" href="#projets">Voir nos projets <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a class="btn ghost" href="#defi">Le Défi MÉDIQ</a>
+    </div>
+    <svg class="ecg" viewBox="0 0 1200 110" preserveAspectRatio="none" aria-hidden="true"><path id="ecgp" d="M0 70 H180 L200 62 L220 70 H250 L262 78 L280 8 L298 98 L312 70 H350 Q372 50 394 70 H600 L620 62 L640 70 H670 L682 78 L700 8 L718 98 L732 70 H770 Q792 50 814 70 H1020 L1040 62 L1060 70 H1090 L1102 78 L1120 8 L1138 98 L1152 70 H1200"/></svg>
+    <div class="facts">
+      <div><strong>54</strong>participant·es au Défi MÉDIQ 2026</div>
+      <div><strong>3</strong>mandats de recherche en biomécanique pulmonaire</div>
+      <div><strong>ÉTS</strong>club étudiant, Montréal</div>
+    </div>
+  </div>
+</header>
+
+<section class="band light" id="mission">
+  <div class="wrap mission">
+    <div>
+      <h2>Un pont entre l'atelier de génie et le bloc opératoire.</h2>
+      <p class="lead" style="margin-top:20px">Les meilleures idées en santé viennent souvent du terrain. Notre rôle : écouter les cliniciens, traduire leurs problèmes en mandats d'ingénierie et les confier à des équipes étudiantes motivées.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21.5h11.6a2 2 0 0 0 1.7-3L14 9V3"/><path d="M7 15h10"/></svg></span><div><h3>Projets avec des chercheurs</h3><p>Des mandats concrets, encadrés par des professeurs et des médecins.</p></div></div>
+      <div class="pillar"><span class="ico"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3a3 3 0 0 1-3 4M7 5H4a3 3 0 0 0 3 4"/></svg></span><div><h3>Compétition</h3><p>Le Défi MÉDIQ met les équipes au défi sur une vraie problématique clinique.</p></div></div>
+      <div class="pillar"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></span><div><h3>Immersion sur le terrain</h3><p>Des journées dans les milieux de santé pour observer, poser des questions et repérer quoi améliorer.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band pale" id="projets">
+  <div class="wrap">
+    <div class="head">
+      <h2>Nos projets</h2>
+      <p class="lead" style="max-width:44ch">Chaque projet part d'un besoin exprimé par le milieu clinique ou la recherche.</p>
+    </div>
+    <div class="grid">
+      <article class="card big spot">
+        <span class="tag">En cours</span>
+        <h3>Biomécanique pulmonaire</h3>
+        <p>Trois mandats confiés à nos membres sur le comportement mécanique du tissu pulmonaire, en collaboration avec le Pr Tabiai et le Dr Rakovich.</p>
+        <div class="lungs">
+          <svg viewBox="0 0 320 300" role="img" aria-label="Illustration de poumons">
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B9FE8"/><stop offset="1" stop-color="#1E4FA3"/></linearGradient>
+              <linearGradient id="rg" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FB6F0"/><stop offset="1" stop-color="#1E4FA3"/></linearGradient>
+            </defs>
+            <ellipse cx="160" cy="288" rx="120" ry="8" fill="#0D1A35" opacity=".45"/>
+            <path d="M146 78 C104 84 62 142 54 204 C48 252 64 282 98 284 C130 286 148 262 150 232 L150 112 Z" fill="url(#lg)"/>
+            <path d="M174 78 C216 84 258 142 266 204 C272 252 256 282 222 284 C190 286 172 262 170 232 L170 112 Z" fill="url(#rg)"/>
+            <path d="M146 78 C104 84 62 142 54 204" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2"/>
+            <path d="M174 78 C216 84 258 142 266 204" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2"/>
+            <path d="M160 14 V96 M160 96 L132 130 M132 130 L112 160 M132 130 L124 176 M160 96 L188 130 M188 130 L208 160 M188 130 L196 176" fill="none" stroke="#F5F7FC" stroke-width="7" stroke-linecap="round"/>
+            <path d="M208 214 L250 196" stroke="#C8302A" stroke-width="3" stroke-dasharray="5 5" stroke-linecap="round"/>
+            <circle cx="252" cy="195" r="5" fill="#C8302A"/>
+          </svg>
+        </div>
+        <p class="cap">Emplacement prévu pour une illustration Servier Medical Art, recolorée aux couleurs de la charte.</p>
+      </article>
+      <article class="card spot">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span>
+        <h3>Collaborations cliniques</h3>
+        <p>Des chercheurs et des médecins nous approchent avec des problèmes à résoudre. On forme une équipe, on cadre le mandat, on livre.</p>
+      </article>
+      <article class="card spot">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6M12 8v4M10 10h4"/></svg></span>
+        <h3>Journées d'immersion</h3>
+        <p>En préparation : des visites dans des centres du réseau de la santé pour parler au personnel et aux patients.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band defi" id="defi">
+  <div class="wrap">
+    <div>
+      <h2>Le Défi MÉDIQ</h2>
+      <p class="lead">Une compétition d'innovation en santé où des équipes étudiantes s'attaquent à une problématique clinique réelle. L'édition 2026 s'est tenue le 14 mars à Polytechnique Montréal. La prochaine édition est en préparation.</p>
+      <div class="cta"><a class="btn red" href="#joindre">Être avisé de la prochaine édition</a></div>
+    </div>
+    <div class="stat">
+      <div class="n">54</div>
+      <p>participant·es à l'édition 2026, à Polytechnique Montréal.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band light" id="evenements">
+  <div class="wrap">
+    <div class="head"><h2>Événements à venir</h2></div>
+    <ul class="events">
+      <li><div class="date">22 janv.<small>vendredi, 2027</small></div><div><h3>Soirée d'accueil, session d'hiver</h3><p>Rencontre l'équipe, découvre les projets ouverts et trouve ta place.</p></div><span class="tag">Social</span></li>
+      <li><div class="date">10 févr.<small>mercredi, 2027</small></div><div><h3>Midi-conférence : le génie au bloc opératoire</h3><p>Un clinicien-chercheur présente les problèmes qu'il aimerait confier à des ingénieurs.</p></div><span class="tag">Conférence</span></li>
+      <li><div class="date">Mars<small>2027, date à confirmer</small></div><div><h3>Défi MÉDIQ, édition 2027</h3><p>Lieu et thème annoncés à l'hiver.</p></div><span class="tag">Compétition</span></li>
+      <li><div class="date">Avril<small>2027</small></div><div><h3>Journée d'immersion en milieu de santé</h3><p>Places limitées, priorité aux membres actifs.</p></div><span class="tag">Terrain</span></li>
+    </ul>
+    <p class="note">Événements d'exemple pour la démo, à remplacer par le vrai calendrier.</p>
+  </div>
+</section>
+
+<section class="band" id="joindre" style="background:var(--nuit)">
+  <div class="wrap join">
+    <div>
+      <h2>Rejoins le mouvement.</h2>
+      <p class="lead" style="color:rgba(255,255,255,.75);margin-top:18px">Peu importe ton programme ou ton année, il y a une place pour toi.</p>
+      <div class="ways">
+        <div class="way spot"><h3>Étudiant·e de l'ÉTS</h3><p>Deviens membre, joins un projet ou aide à organiser le Défi MÉDIQ.</p></div>
+        <div class="way spot"><h3>Clinicien·ne ou chercheur·se</h3><p>Tu as un problème qui mérite un regard d'ingénieur ? Parle-nous-en.</p></div>
+        <div class="way spot"><h3>Partenaire</h3><p>Soutiens la relève en génie de la santé et rencontre nos membres.</p></div>
+      </div>
+    </div>
+    <form id="f" novalidate>
+      <h3>Nous écrire</h3>
+      <label for="nom">Nom complet<input id="nom" name="nom" autocomplete="name" placeholder="Prénom Nom"></label>
+      <label for="mail">Courriel<input id="mail" name="mail" type="email" autocomplete="email" placeholder="prenom.nom@etsmtl.ca"></label>
+      <label for="profil">Je suis<select id="profil" name="profil"><option>Étudiant·e de l'ÉTS</option><option>Clinicien·ne ou chercheur·se</option><option>Partenaire potentiel</option><option>Autre</option></select></label>
+      <label for="msg">Message<textarea id="msg" name="msg" placeholder="Dis-nous ce qui t'intéresse"></textarea></label>
+      <button class="btn red" type="submit">Envoyer</button>
+      <p id="ok" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a class="logo" href="#top"><span><b>Santé</b><small>ÉTS</small></span></a>
+      <p style="margin-top:14px;max-width:36ch">Club étudiant de génie de la santé de l'École de technologie supérieure. 1100, rue Notre-Dame Ouest, Montréal.</p>
+    </div>
+    <div><h4>Le site</h4><ul><li><a href="#mission">Le club</a></li><li><a href="#projets">Projets</a></li><li><a href="#defi">Défi MÉDIQ</a></li><li><a href="#evenements">Événements</a></li></ul></div>
+    <div><h4>S'impliquer</h4><ul><li><a href="#joindre">Devenir membre</a></li><li><a href="#joindre">Proposer un projet</a></li><li><a href="#joindre">Devenir partenaire</a></li></ul></div>
+<pre class="ascii" aria-hidden="true">        /\                         /\                         /\
+_______/  \  ___/\________________/  \  ___/\________________/  \  ___/\______
+           \/                         \/                         \/    santé ÉTS</pre>
+    <p class="credits">Démo de travail. Illustrations médicales prévues : Servier Medical Art, CC BY 4.0. Icônes animées prévues : Lordicon (attribution requise en version gratuite).</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+<script>
+{
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hero : dégradé granuleux en WebGL (remplace ShaderGradient, sans React)
+  const cv = document.getElementById('sh');
+  const gl = cv.getContext('webgl', {antialias:false, premultipliedAlpha:false});
+  if (gl) {
+    const vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+    const fs = `precision mediump float;uniform vec2 r;uniform float t;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.;a*=.5;}return v;}
+void main(){vec2 uv=gl_FragCoord.xy/r;vec2 p=uv;p.x*=r.x/r.y;
+float q=fbm(p*1.3+vec2(t*.035,t*.02));float w=fbm(p*1.1+q*1.7-vec2(t*.03,0.));
+vec3 nuit=vec3(.051,.102,.208),navy=vec3(.102,.173,.357),bleu=vec3(.118,.31,.639),ciel=vec3(.357,.624,.91),rouge=vec3(.784,.188,.165);
+vec3 c=mix(nuit,navy,smoothstep(.25,.6,w));
+c=mix(c,bleu,smoothstep(.45,.78,w)*.9);
+c=mix(c,ciel,smoothstep(.62,.9,w)*(.35+uv.y*.65));
+float rd=smoothstep(.5,.85,fbm(p*1.25-vec2(0.,t*.045)+3.7))*smoothstep(.25,1.,uv.x);
+c=mix(c,rouge,rd*.8);
+float shade=smoothstep(0.,.95,length((uv-vec2(0.,0.))*vec2(1.,1.4)));
+c*=.42+.58*shade;
+c+=(h(gl_FragCoord.xy+fract(t*7.))-.5)*.07;
+gl_FragColor=vec4(c,1.);}`;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs));
+    gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(pr);
+    if (gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+      gl.useProgram(pr);
+      const b = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(pr, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const uR = gl.getUniformLocation(pr, 'r'), uT = gl.getUniformLocation(pr, 't');
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      let visible = true, raf = 0;
+      const size = () => { cv.width = Math.max(1, cv.clientWidth * dpr); cv.height = Math.max(1, cv.clientHeight * dpr); gl.viewport(0, 0, cv.width, cv.height); };
+      const frame = (ms) => { gl.uniform2f(uR, cv.width, cv.height); gl.uniform1f(uT, ms / 1000); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); if (!reduce && visible) raf = requestAnimationFrame(frame); };
+      const heroRO = new ResizeObserver(() => { size(); if (reduce || !visible) frame(8000); });
+      heroRO.observe(cv);
+      const heroIO = new IntersectionObserver(([e]) => { visible = e.isIntersecting; cancelAnimationFrame(raf); if (visible && !reduce) raf = requestAnimationFrame(frame); });
+      heroIO.observe(cv);
+    }
+  }
+
+  // Anime.js : tracé ECG et entrée du titre
+  if (window.anime && !reduce) {
+    anime({ targets: '#ecgp', strokeDashoffset: [anime.setDashoffset, 0], easing: 'easeInOutSine', duration: 3200, loop: true });
+    anime({ targets: '.hero h1 .l', translateY: [30, 0], opacity: [0, 1], delay: anime.stagger(110), duration: 900, easing: 'easeOutExpo' });
+  }
+
+  // Cartes « spotlight » (effet inspiré de React Bits, en JS pur)
+  document.querySelectorAll('.spot').forEach(el => {
+    el.addEventListener('pointermove', e => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--x', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--y', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  // Formulaire de démo
+  const f = document.getElementById('f'), ok = document.getElementById('ok');
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const nom = f.nom.value.trim();
+    ok.textContent = nom ? 'Merci ' + nom + ' ! (Démo : rien n’a été envoyé.)' : 'Indique ton nom pour essayer le formulaire.';
+  });
+}
+</script>
+</body>
+</html>
